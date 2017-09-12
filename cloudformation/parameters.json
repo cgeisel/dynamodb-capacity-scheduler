@@ -1,0 +1,27 @@
+[
+  {
+    "ParameterValue": "DynamoDBCapacityScheduler",
+    "UsePreviousValue": false,
+    "ParameterKey": "ResourcePrefix"
+  },
+  {
+    "ParameterValue": "rate(1 minute)",
+    "UsePreviousValue": false,
+    "ParameterKey": "ScheduleExpression"
+  },
+  {
+    "ParameterValue": "60",
+    "UsePreviousValue": false,
+    "ParameterKey": "Timeout"
+  },
+  {
+    "ParameterValue": "256",
+    "UsePreviousValue": false,
+    "ParameterKey": "MemorySize"
+  },
+  {
+    "ParameterValue": "dynamodb-scaling-plans",
+    "UsePreviousValue": false,
+    "ParameterKey": "SchedulerS3Bucket"
+  }
+]
