@@ -22,26 +22,36 @@ def _load_config(filename='config.yaml'):
         logger.info('Loaded config: {0}'.format(config))
     return config
 
-def get_plans(bucket, resource):
-    logger.debug('Getting plans from bucket: {0}'.format(bucket))
+def get_plans(bucket, resource, region):
+    logger.info('Getting plans from bucket: {0} in {1}'.format(bucket, region))
     bucket = resource.Bucket(bucket)
     plans = {}
+    disabled = []
     for obj in bucket.objects.all():
         try:
             table_name = None
             file_name = obj.key
+            logger.info('Reading plan {0}'.format(file_name))
             scaling_plan = json.loads(obj.get()['Body'].read())
             table_name = scaling_plan['TableName']
-            if obj.key != table_name:
-                logger.error('File name does not match table name, skipping {0}'.format(file_name))
+            if not scaling_plan['Region'] == region:
+                logger.info('Scaling plan for {0} in {1}, skipping'.format(table_name, scaling_plan['Region']))
                 continue
             if not scaling_plan['Enabled']:
                 logger.info('Scaling plan for {0} not enabled, skipping'.format(table_name))
                 continue
+            if table_name in plans:
+                logger.error('Found multiple scaling plans for in {0}, disabling scaling for {1} until duplicate removed'.format(file_name, table_name))
+                disabled.append(table_name)
+                continue
         except Exception as e:
             logger.error('Could not load scaling plan {0} ({1})'.format(file_name, e))
+            continue
 
         plans[table_name] = scaling_plan
+
+    for table_name in disabled:
+        del plans[table_name]
 
     return plans
 
@@ -199,8 +209,11 @@ def handler(event, context):
         Utility.aws_account_id()))
 
     bucket = config["scheduler_s3_bucket"]
+    session = boto3.session.Session()
+    region = session.region_name
+
     s3 = boto3.resource('s3')
-    plans = get_plans(bucket, s3)
+    plans = get_plans(bucket, s3, region)
 
     now = datetime.utcnow()
     active_policies = get_active_policies(now, plans)

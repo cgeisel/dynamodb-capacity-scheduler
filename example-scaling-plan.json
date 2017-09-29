@@ -1,5 +1,6 @@
 {
     "TableName": "example-ddb-table",
+    "Region": "us-west-2",
     "Enabled": true,
     "Policies": [
         {

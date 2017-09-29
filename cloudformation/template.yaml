@@ -115,15 +115,16 @@ Resources:
         Statement:
           - Effect: Allow
             Action:
-              - "application-autoscaling:DescribeScalableTargets"
-              - "application-autoscaling:DescribeScalingPolicies"
               - "application-autoscaling:PutScalingPolicy"
               - "application-autoscaling:RegisterScalableTarget"
+              - "application-autoscaling:DescribeScalingPolicies"
+              - "application-autoscaling:DescribeScalableTargets"
             Resource: "*"
           - Effect: Allow
             Action:
               - "dynamodb:DescribeTable"
-            Resource: "arn:aws:dynamodb:*:*:table/*"
+            Resource:
+              - "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/*"
 
 
   # The IAM role that the lambda function will execute under.
