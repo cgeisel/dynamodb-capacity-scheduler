@@ -115,12 +115,25 @@ def update_tables(active_policies, dynamodb, autoscaling):
                 ]
             )
 
+            print "describe_scalable_targets response"
+            print json.dumps(response, sort_keys=True, default=str)
+
             current_read_target = filter(lambda target: target['ScalableDimension'] == 'dynamodb:table:ReadCapacityUnits', response['ScalableTargets'])[0]
+
+            print "current_read_target"
+            print json.dumps(current_read_target, sort_keys=True, default=str)
+
             if not (current_read_target['MinCapacity'] == active_policies[table]['ReadCapacityUnits']['MinCapacity'] or current_read_target['MaxCapacity'] == active_policies[table]['ReadCapacityUnits']['MaxCapacity']):
+                print "updating read target"
                 update_read_target(table, active_policies[table], autoscaling)
 
+            print "current_write_target"
             current_write_target = filter(lambda target: target['ScalableDimension'] == 'dynamodb:table:WriteCapacityUnits', response['ScalableTargets'])[0]
+
+            print json.dumps(current_write_target, sort_keys=True, default=str)
+
             if not (current_write_target['MinCapacity'] == active_policies[table]['WriteCapacityUnits']['MinCapacity'] or current_write_target['MaxCapacity'] == active_policies[table]['WriteCapacityUnits']['MaxCapacity']):
+                print "updating write target"
                 update_write_target(table, active_policies[table], autoscaling)
 
 def update_read_policy(table, policy, autoscaling):
